@@ -139,10 +139,34 @@ Target: fresh checkout → `python src/experiments.py` regenerates all figures i
 
 ---
 
-## 10. Current Status
+## 10. Query Class (formal scope — from professor's approval)
 
-- ✅ Plan approved, folder structure scaffolded
-- ⏳ Waiting on professor's email reply confirming topic
-- ⏳ Next action: if approved, start M1 report
+Professor Yinghui approved on 2026-04-20 with the constraint:
+> "You may test on sample queries, but **your method should be general for a class of queries**."
+
+The two query classes this project covers:
+
+| Query class | Input | Output |
+|---|---|---|
+| **TopK recommendation query** | `user_id u, k` | ordered list of `k` movie_ids predicted-highest by CF |
+| **Why-provenance query** | `user_id u, movie_id m` (where m ∈ TopK(u,k)) | minimal set of ratings that caused m to appear in the top-k |
+
+Generality requirements (must hold for ALL valid inputs, not just demo examples):
+- `top_k(u, k)` works for any `u ∈ [1, 943]`, any `k ∈ [1, 20]`
+- `why_prov(u, m, k)` works for any `u ∈ [1, 943]`, any `m ∈ TopK(u, k)`
+- `query_rewrite(u, target, q)` works for any `u`, any movie `target` not in TopK(u,k)
+
+Experiments must evaluate on **random samples of ≥50 (u, m) pairs**, not hand-picked examples.
+
+---
+
+## 11. Current Status
+
+- ✅ Plan approved, folder structure scaffolded, pushed to GitHub
+- ✅ Professor approved topic (2026-04-20), confirmed solo OK
+- ✅ Query class formally defined (§10)
+- ✅ M1 report filled
+- ✅ MovieLens 100K downloaded to `data/raw/ml-100k/` (2026-04-20)
+- ⏳ Next action: M2 — implement `src/load.py` (CSV → SQLite), then `src/index.py`
 
 Update this section when status changes.
