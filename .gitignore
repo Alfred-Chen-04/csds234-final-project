@@ -1,0 +1,16 @@
+# Data (re-downloadable)
+data/raw/
+data/*.db
+
+# Generated results (re-runnable)
+results/*.png
+results/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
