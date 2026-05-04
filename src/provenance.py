@@ -15,9 +15,15 @@ def _contributors(movie_id: int, db_path: str = DB_PATH) -> list[tuple[int, floa
     return rows
 
 
-def _predict_without(algo, user_id: int, movie_id: int,
+def _score_decay_approximation(algo, user_id: int, movie_id: int,
                      exclude_users: set, db_path: str = DB_PATH) -> float:
-    """Re-estimate CF score for (user_id, movie_id) ignoring ratings from exclude_users."""
+    """Heuristic score-decay approximation: estimate the CF score for
+    (user_id, movie_id) after removing ratings from `exclude_users`, by
+    scaling the base SVD prediction proportionally to the removed weight
+    fraction. This avoids the cost of re-training SVD per query. The
+    approximation preserves *ranking* (rank-monotonic in removed weight)
+    sufficiently for top-k membership decisions, though absolute scores
+    differ from a true counterfactual SVD re-evaluation."""
     conn = get_db(db_path)
     # Reconstruct partial prediction by removing the influence of exclude_users.
     # Approximation: subtract their weighted contribution from the raw score.
@@ -60,7 +66,7 @@ def why_prov(user_id: int, movie_id: int, k: int = 10,
         removed.add(contrib_user)
         witness.append((contrib_user, movie_id))
 
-        new_score = _predict_without(algo, user_id, movie_id, removed, db_path)
+        new_score = _score_decay_approximation(algo, user_id, movie_id, removed, db_path)
 
         # Check if movie_id would fall out of top-k with this adjusted score
         topk_ids = top_k(user_id, k, db_path)

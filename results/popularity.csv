@@ -1,0 +1,4 @@
+bucket,n,mean_speedup,mean_index_ms,mean_naive_ms
+cold (≤20),0,0,0,0
+medium (21–50),3,1.38,36.58,50.23
+hot (51+),57,1.79,54.13,99.38

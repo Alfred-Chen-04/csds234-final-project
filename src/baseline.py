@@ -15,9 +15,12 @@ def _all_raters(movie_id: int, db_path: str = DB_PATH) -> list[tuple[int, float]
     return rows
 
 
-def _predict_without_naive(algo, user_id: int, movie_id: int,
+def _score_decay_approximation_naive(algo, user_id: int, movie_id: int,
                            exclude_users: set, db_path: str = DB_PATH) -> float:
-    """Same score adjustment as provenance.py but using full rating scan."""
+    """Same heuristic score-decay approximation as provenance.py, but
+    computed over a full rating scan (no index pruning). Used by the naive
+    baseline to keep the score-adjustment math identical between the two
+    algorithms — only the search space differs."""
     conn = get_db(db_path)
     all_ratings = conn.execute(
         "SELECT user_id, rating FROM ratings WHERE movie_id=?",
@@ -48,7 +51,7 @@ def naive_why_prov(user_id: int, movie_id: int, k: int = 10,
     for rater_id, _ in raters:
         removed.add(rater_id)
         witness.append((rater_id, movie_id))
-        new_score = _predict_without_naive(algo, user_id, movie_id, removed, db_path)
+        new_score = _score_decay_approximation_naive(algo, user_id, movie_id, removed, db_path)
         topk_ids = top_k(user_id, k, db_path)
         if movie_id not in topk_ids or new_score < algo.predict(user_id, topk_ids[k - 1]).est:
             return witness

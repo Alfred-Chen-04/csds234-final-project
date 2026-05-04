@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>But Why? — Data and Query Provenance for Explainable Movie Recommendations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root {
+  --accent: #2c5e9e;
+  --accent-light: #4a90d9;
+  --accent-soft: #e6efff;
+  --warm: #d9534f;
+  --ink: #1a1a1a;
+  --ink-muted: #555;
+  --border: #e3e7ec;
+}
+.reveal {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  font-weight: 400;
+}
+.reveal .slides section {
+  text-align: left;
+  padding: 0 30px;
+}
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  text-transform: none;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.reveal h1 { font-size: 2.4em; line-height: 1.15; }
+.reveal h2 { font-size: 1.8em; margin-bottom: 0.4em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent); margin-bottom: 0.3em; }
+.reveal p { font-size: 0.85em; line-height: 1.55; color: var(--ink-muted); }
+.reveal strong { color: var(--ink); font-weight: 600; }
+.reveal em { color: var(--accent); font-style: normal; font-weight: 600; }
+.reveal ul, .reveal ol { font-size: 0.85em; line-height: 1.6; color: var(--ink-muted); }
+.reveal ul li::marker { color: var(--accent); }
+.reveal pre { box-shadow: none; }
+.reveal pre code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55em;
+  line-height: 1.5;
+  padding: 18px 22px;
+  border-radius: 8px;
+  background: #fafbfc;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  max-height: 420px;
+}
+.reveal code { color: var(--accent); }
+.reveal a { color: var(--accent); text-decoration: none; }
+.reveal table {
+  font-size: 0.7em;
+  border-collapse: collapse;
+  margin: 0.5em 0;
+}
+.reveal table th, .reveal table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.reveal table th { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.reveal section img {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  background: white;
+}
+/* Title slide */
+.title-slide {
+  text-align: center !important;
+}
+.title-slide h1 {
+  font-size: 3em !important;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.2em;
+}
+.title-slide .subtitle {
+  font-size: 1.1em;
+  color: var(--ink-muted);
+  font-weight: 500;
+  margin-bottom: 1.5em;
+}
+.title-slide .meta {
+  font-size: 0.7em;
+  color: var(--ink-muted);
+  line-height: 1.8;
+}
+.title-slide .meta strong { color: var(--accent); }
+/* Quote / callout */
+.callout {
+  background: var(--accent-soft);
+  border-left: 4px solid var(--accent);
+  padding: 18px 22px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--ink);
+  margin: 0.7em 0;
+  font-style: italic;
+}
+.headline {
+  font-size: 1.05em !important;
+  color: var(--ink) !important;
+  font-weight: 500;
+  margin-bottom: 0.4em;
+}
+.kpi {
+  display: inline-block;
+  font-size: 1.4em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 0.8em;
+}
+.two-col {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+.two-col img { width: 100%; }
+.kpi-row {
+  display: flex;
+  gap: 20px;
+  margin: 0.7em 0;
+  flex-wrap: wrap;
+}
+.kpi-card {
+  flex: 1;
+  min-width: 140px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+.kpi-card .num {
+  display: block;
+  font-size: 1.6em;
+  color: var(--accent);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.kpi-card .lbl {
+  font-size: 0.72em;
+  color: var(--ink-muted);
+  margin-top: 4px;
+}
+.tag {
+  display: inline-block;
+  font-size: 0.65em;
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+/* Footer pagination */
+.reveal .progress { color: var(--accent); }
+.slide-footer {
+  position: absolute;
+  bottom: 18px;
+  right: 30px;
+  font-size: 0.4em;
+  color: #aaa;
+  letter-spacing: 0.05em;
+}
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ─────────────────────────────────  SLIDE 1: TITLE ───────────────────────────────── -->
+<section class="title-slide">
+  <span class="tag">CSDS 234 · Final Project</span>
+  <h1>But Why?</h1>
+  <p class="subtitle">Data and Query Provenance for<br>Explainable Movie Recommendations</p>
+  <p class="meta">
+    <strong>Qianyi Chen</strong> (Alfred) &nbsp;·&nbsp; Solo &nbsp;·&nbsp; CSDS 234<br>
+    Prof. Yinghui Wu &nbsp;·&nbsp; Case Western Reserve University<br>
+    May 2026
+  </p>
+  <aside class="notes">Hi everyone, I'm Qianyi. Today I'll present my solo project: applying database provenance to make movie recommendations explainable. About 7 minutes. Let's start with the question that motivated this.</aside>
+</section>
+
+<!-- ─────────────────────────────────  SLIDE 2: THE QUESTION ───────────────────────────────── -->
+<section>
+  <span class="tag">Motivation</span>
+  <h2>"Why was this recommended?"</h2>
+  <div class="callout">
+    Netflix recommends <em>Fargo</em> to Alfred. Why? Was it his love for <em>Pulp Fiction</em>?
+    His rating of <em>Shawshank</em>? Some pattern shared with strangers he'll never meet?
+  </div>
+  <ul>
+    <li><strong>Regulatory pressure:</strong> GDPR Article 22 — users have the right to "meaningful information" about automated decisions.</li>
+    <li><strong>Product trust:</strong> explainable recommendations build user confidence and unlock content discovery.</li>
+    <li><strong>Today's CF models</strong> (matrix factorization, SVD) hide their reasoning in 50-dim latent vectors — black-box by construction.</li>
+  </ul>
+  <p style="margin-top: 0.8em;">→ Most existing explanation methods <strong>modify the model</strong> (hurts accuracy) or <strong>generate post-hoc text</strong> (may not be faithful).</p>
+  <p>→ <em>Our angle: explain via the database, using formal data provenance.</em></p>
+  <div class="slide-footer">2 / 9</div>
+  <aside class="notes">Picture this: Netflix recommends Fargo. We want to know why. Today, you can't really get a faithful answer. GDPR even gives users the legal right to demand one. Our angle is different: we explain using data provenance — the actual ratings in the database that caused this recommendation.</aside>
+</section>
+
+<!-- ─────────────────────────────────  SLIDE 3: PROBLEM DEFINITION ───────────────────────────────── -->
+<section>
+  <span class="tag">Problem · Formal</span>
+  <h2>Two query classes</h2>
+  <div class="two-col" style="grid-template-columns: 1fr 1fr;">
+    <div>
+      <h3>1. Why-Provenance</h3>
+      <p><strong>Input:</strong> user <em>u</em>, movie <em>m</em> ∈ TopK(<em>u</em>, <em>k</em>)</p>
+      <p><strong>Output:</strong> minimal <em>W</em> ⊆ <em>R</em> such that <em>m</em> ∉ TopK<sub>R\W</sub>(<em>u</em>, <em>k</em>)</p>
+      <p style="font-size: 0.78em; color: var(--ink);">
+        <em>"Which ratings caused this recommendation?"</em>
+      </p>
+    </div>
+    <div>
+      <h3>2. Query Rewrite</h3>
+      <p><strong>Input:</strong> user <em>u</em>, target movie <em>t</em> ∉ TopK(<em>u</em>, <em>k</em>)</p>
+      <p><strong>Output:</strong> minimal edit <em>e</em> such that <em>t</em> ∈ TopK<sub>R+e</sub>(<em>u</em>, <em>k</em>)</p>
+      <p style="font-size: 0.78em; color: var(--ink);">
+        <em>"What change would surface this movie?"</em>
+      </p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top: 1em;">
+    <strong>Generality requirement</strong> (per professor's approval):
+    Method must work for <em>any</em> user, <em>any</em> movie, <em>any</em> k ∈ [1, 20] —
+    not just hand-picked demo cases.
+  </div>
+  <div class="slide-footer">3 / 9</div>
+  <aside class="notes">We formalize two query classes. The first is why-provenance: the minimal set of ratings whose removal would knock movie m out of the top-k. The second is query rewrite: the smallest edit needed to surface a missing movie. The professor explicitly required generality — these algorithms must work for any input, not just demos.</aside>
+</section>
+
+<!-- ─────────────────────────────────  SLIDE 4: APPROACH ───────────────────────────────── -->
+<section>
+  <span class="tag">Approach</span>
+  <h2>Inverted index for pruning</h2>
+  <div class="two-col">
+    <div>
+      <p><strong>Naive search:</strong> consider all raters of <em>m</em> — up to <strong>O(|R|)</strong> per query.</p>
+      <p><strong>Our index:</strong> precompute, for each movie, the <strong>top-<em>C</em> = 50</strong> highest-rating contributors. Search becomes <strong>O(<em>C</em>)</strong>.</p>
+      <p style="margin-top: 1em;"><strong>Key insight:</strong> a movie's predicted score is dominated by its strongest raters. If they don't move the needle, the long tail won't either.</p>
+      <div class="kpi-row" style="margin-top: 1.2em;">
+        <div class="kpi-card">
+          <span class="num">0.16 s</span>
+          <span class="lbl">one-time index build</span>
+        </div>
+        <div class="kpi-card">
+          <span class="num">46,435</span>
+          <span class="lbl">index entries (50 / movie)</span>
+        </div>
+      </div>
+    </div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.6em; background: #fafbfc; border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; line-height: 1.7; color: var(--ink);">
+      <span style="color: var(--accent); font-weight: 700;">movie_contributors</span><br>
+      ────────────────────────<br>
+      <span style="color: var(--ink-muted);">movie_id  user_id  weight</span><br>
+      ────────────────────────<br>
+      &nbsp;&nbsp;<span style="color:var(--accent)">483</span> &nbsp;&nbsp; 932 &nbsp;&nbsp;&nbsp; 5.0<br>
+      &nbsp;&nbsp;<span style="color:var(--accent)">483</span> &nbsp;&nbsp; 916 &nbsp;&nbsp;&nbsp; 5.0<br>
+      &nbsp;&nbsp;<span style="color:var(--accent)">483</span> &nbsp;&nbsp; 477 &nbsp;&nbsp;&nbsp; 5.0<br>
+      &nbsp;&nbsp;<span style="color:var(--accent)">483</span> &nbsp;&nbsp; 658 &nbsp;&nbsp;&nbsp; 4.5<br>
+      &nbsp;&nbsp;...<br>
+      &nbsp;&nbsp;<span style="color:var(--accent)">483</span> &nbsp;&nbsp; 211 &nbsp;&nbsp;&nbsp; 3.5 <span style="color:var(--ink-muted);">← cap C=50</span><br>
+      ────────────────────────
+    </div>
+  </div>
+  <div class="slide-footer">4 / 9</div>
+  <aside class="notes">Our key data structure is an inverted index: for each movie, store the 50 highest-rating users. Naive provenance has to scan all raters; ours only checks the top-50. The index builds in 0.16 seconds and has 46k entries total — smaller than the raw ratings table.</aside>
+</section>
+
+<!-- ─────────────────────────────────  SLIDE 5: ALGORITHM ───────────────────────────────── -->
+<section>
+  <span class="tag">Algorithm</span>
+  <h2>WhyProv — greedy removal with early termination</h2>
+<pre><code class="language-python" data-trim>
+ALGORITHM WhyProv(u, m, k, index I)
+
+ 1.  contributors ← I.lookup(m)            # top-C, O(C) lookup
+ 2.  removed ← ∅ ;  witness ← []
+ 3.  FOR each (c, w) IN contributors sorted by w DESC:
+ 4.      removed ← removed ∪ {c}
+ 5.      witness.append((c, m))
+ 6.      score_m ← ScoreDecayApprox(u, m, removed)        # †
+ 7.      threshold ← Predict(u, TopK(u,k)[k-1])
+ 8.      IF score_m &lt; threshold OR m ∉ TopK(u, k):
+ 9.          RETURN witness                                # minimal!
+10.  RETURN witness
+</code></pre>
+  <p style="font-size: 0.7em; margin-top: 0.6em;">
+    † <strong>Score-decay approximation:</strong> instead of re-training SVD per query (seconds),
+    scale the base score by the removed-weight fraction.
+    <em>Rank-monotonic</em> — sufficient for top-<em>k</em> membership decisions.
+  </p>
+  <div class="slide-footer">5 / 9</div>
+  <aside class="notes">Here's the algorithm. We pull the top-C contributors from the index, then greedily add them to a "removed" set in descending weight order. After each removal, we re-estimate the score using a fast approximation, and check if the movie has dropped below the top-k threshold. The moment it does, we return — that's our minimal witness. The footnote-marked ScoreDecayApprox is a key engineering choice: instead of retraining SVD per query (which would take seconds), we scale the score linearly by removed weight. It's an approximation, but it's rank-monotonic, which is all we need to decide top-k membership.</aside>
+</section>
+
+<!-- ─────────────────────────────────  SLIDE 6: SETUP + RESULT 1 ───────────────────────────────── -->
+<section>
+  <span class="tag">Experiments · Result 1</span>
+  <h2>Index vs. naive: <em>1.77×</em> speedup at <em>k</em>=10</h2>
+  <div class="two-col">
+    <div>
+      <p style="font-size: 0.78em;">
+        <strong>Setup:</strong> MovieLens 100K · 60 random (user, movie) pairs sampled
+        from each user's top-20 · k = 10 · seed = 42 · M-series laptop.
+      </p>
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <span class="num">49 ms</span>
+          <span class="lbl">index-pruned WhyProv</span>
+        </div>
+        <div class="kpi-card">
+          <span class="num">95 ms</span>
+          <span class="lbl">naive full scan</span>
+        </div>
+        <div class="kpi-card" style="background: var(--accent-soft); border-color: var(--accent);">
+          <span class="num">1.77×</span>
+          <span class="lbl">speedup, <em>every</em> query</span>
+        </div>
+      </div>
+      <p style="font-size: 0.75em; margin-top: 0.6em;">
+        In <strong>none</strong> of the 60 pairs does the naive baseline beat the index.
+        The witness sets are also <em>smaller</em>, because the index terminates earlier.
+      </p>
+    </div>
+    <img src="../results/runtime_comparison.png" alt="Runtime comparison">
+  </div>
+  <div class="slide-footer">6 / 9</div>
+  <aside class="notes">Setup: MovieLens 100K, 60 random user-movie pairs drawn from each user's top-20 — realistic of what users actually see. At k=10, our index-pruned algorithm runs at 49ms per query versus 95ms for the naive scan. That's a 1.77x speedup, and importantly, the index wins on every single query — not on average.</aside>
+</section>
+
+<!-- ─────────────────────────────────  SLIDE 7: RESULT 2 (k-sweep + popularity) ───────────────────────────────── -->
+<section>
+  <span class="tag">Experiments · Result 2 + 3</span>
+  <h2>Speedup grows with <em>k</em> and with movie popularity</h2>
+  <div class="two-col">
+    <div>
+      <h3 style="font-size: 0.95em;">Effect of <em>k</em></h3>
+      <table>
+        <tr><th><em>k</em></th><th>Index</th><th>Naive</th><th>Speedup</th></tr>
+        <tr><td>5</td><td>44 ms</td><td>67 ms</td><td><strong>1.50×</strong></td></tr>
+        <tr><td>10</td><td>49 ms</td><td>95 ms</td><td><strong>1.94×</strong></td></tr>
+        <tr><td>20</td><td>61 ms</td><td>150 ms</td><td><strong style="color: var(--accent);">2.45×</strong></td></tr>
+      </table>
+      <p style="font-size: 0.75em;">
+        ✦ Larger <em>k</em> → naive scan does more per-query work → bigger pruning win.
+      </p>
+      <h3 style="font-size: 0.95em; margin-top: 0.7em;">Effect of popularity</h3>
+      <p style="font-size: 0.78em;">
+        Hot movies (>50 raters): <strong>1.79×</strong> · Medium (21–50): <strong>1.38×</strong>.<br>
+        ✦ The index pays off when there's a long rater tail to prune.
+      </p>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <img src="../results/runtime_vs_k.png" alt="k-sweep" style="max-height: 220px;">
+      <img src="../results/speedup_by_popularity.png" alt="popularity" style="max-height: 220px;">
+    </div>
+  </div>
+  <div class="slide-footer">7 / 9</div>
+  <aside class="notes">We tested two factors. First: vary k. Speedup grows monotonically — 1.5x at k=5, up to 2.45x at k=20. The intuition: larger k means the naive scan does more work per loop iteration, so the gap widens. Second factor: movie popularity. The index gives a 1.79x speedup on hot movies but only 1.38x on medium ones — confirming the theory that pruning pays off when there's a long rater tail.</aside>
+</section>
+
+<!-- ─────────────────────────────────  SLIDE 8: LIMITATIONS + FUTURE WORK ───────────────────────────────── -->
+<section>
+  <span class="tag">Limitations · Future Work</span>
+  <h2>What's missing — and what's next</h2>
+  <div class="two-col">
+    <div>
+      <h3>Limitations (acknowledged)</h3>
+      <ul>
+        <li><strong>Score-decay approximation</strong> is rank-monotonic but not the true counterfactual SVD re-evaluation.</li>
+        <li><strong>QueryRewrite</strong> restricted to single-rating additions — no removals or multi-edits.</li>
+        <li>Top-<em>k</em> sampling is <strong>popularity-biased</strong> — no cold movies in our 60 pairs.</li>
+        <li>Single dataset (MovieLens 100K only).</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Future work</h3>
+      <ul>
+        <li>Validate score-decay vs. <strong>true counterfactual SVD</strong> on a small sample.</li>
+        <li><strong>Multi-hop provenance</strong> — explain the explainers themselves.</li>
+        <li>Scale to MovieLens <strong>1M / 25M</strong>.</li>
+        <li><strong>Human study:</strong> are why-provenance explanations more trusted than attention-based ones?</li>
+        <li>Integrate with <strong>sequence models</strong> (SASRec, BERT4Rec).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-footer">8 / 9</div>
+  <aside class="notes">Honest about the limitations. The score-decay heuristic is rank-correct but not exact — that's the biggest one. Sampling is biased toward popular movies because top-k from SVD is biased that way. And we only tested one dataset. Future work: validate the heuristic against true SVD retrain, multi-hop provenance, larger datasets, and ideally a human study to see if these explanations are actually more useful to real users.</aside>
+</section>
+
+<!-- ─────────────────────────────────  SLIDE 9: CONCLUSION ───────────────────────────────── -->
+<section class="title-slide">
+  <span class="tag">Conclusion</span>
+  <h1 style="font-size: 2em !important;">Database provenance, applied.</h1>
+  <p class="subtitle" style="font-size: 0.95em;">
+    A formal, faithful, and fast way to explain<br>collaborative-filtering recommendations.
+  </p>
+  <div class="kpi-row" style="justify-content: center;">
+    <div class="kpi-card"><span class="num">1.77×</span><span class="lbl">speedup at k=10</span></div>
+    <div class="kpi-card"><span class="num">2.45×</span><span class="lbl">at k=20</span></div>
+    <div class="kpi-card"><span class="num">0.16 s</span><span class="lbl">one-time index build</span></div>
+    <div class="kpi-card"><span class="num">60</span><span class="lbl">random pairs evaluated</span></div>
+  </div>
+  <p class="meta" style="margin-top: 1.5em;">
+    <strong>Code &amp; report:</strong><br>
+    <a href="https://github.com/Alfred-Chen-04/csds234-final-project">github.com/Alfred-Chen-04/csds234-final-project</a>
+  </p>
+  <p style="font-size: 1.2em; color: var(--accent); margin-top: 1em; text-align: center;"><strong>Thank you. Questions?</strong></p>
+  <div class="slide-footer">9 / 9</div>
+  <aside class="notes">To wrap up: we showed that classical database provenance can give us formal, faithful, fast explanations for CF recommendations. The headline numbers: 1.77x speedup at k=10, up to 2.45x at k=20, with a one-time 0.16s index build. The full code and report are on GitHub. Thank you — happy to take questions.</aside>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/notes/notes.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: false,
+  transition: 'slide',
+  transitionSpeed: 'default',
+  width: 1280,
+  height: 800,
+  margin: 0.06,
+  plugins: [ RevealHighlight, RevealNotes ]
+});
+</script>
+</body>
+</html>
