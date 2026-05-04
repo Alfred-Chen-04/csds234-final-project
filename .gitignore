@@ -11,6 +11,14 @@ references/
 !results/*.png
 !reports/*.png
 
+# Local-only artifacts (not for GitHub)
+AGENTS.md
+CSDS234_Qianyi_report.pdf
+reports/presentation.html
+reports/presentation.md
+reports/presentation_script.md
+.pptx_build/
+
 # Python
 __pycache__/
 *.pyc

@@ -51,7 +51,19 @@ python src/experiments.py   # run experiments, write figures to results/
 
 ## Repository Layout
 
-See [AGENTS.md](AGENTS.md) §5.
+```
+src/                    Python source
+  load.py               download + load MovieLens 100K into SQLite
+  index.py              build movie -> top-C contributors index
+  cf.py                 SVD recommender wrapper (scikit-surprise)
+  provenance.py         WhyProv + QueryRewrite (index-pruned)
+  baseline.py           naive full-scan baselines
+  experiments.py        runtime / k-sweep / popularity experiments
+
+results/                experiment outputs (figures + CSVs)
+reports/                milestone + final reports (Markdown)
+CSDS234_Qianyi_slides.pptx   final presentation
+```
 
 ---
 
