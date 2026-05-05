@@ -14,9 +14,7 @@ references/
 # Local-only artifacts (not for GitHub)
 AGENTS.md
 CSDS234_Qianyi_report.pdf
-reports/presentation.html
-reports/presentation.md
-reports/presentation_script.md
+reports/
 .pptx_build/
 
 # Python

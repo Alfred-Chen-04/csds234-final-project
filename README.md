@@ -52,24 +52,14 @@ python src/experiments.py   # run experiments, write figures to results/
 ## Repository Layout
 
 ```
-src/                    Python source
-  load.py               download + load MovieLens 100K into SQLite
-  index.py              build movie -> top-C contributors index
-  cf.py                 SVD recommender wrapper (scikit-surprise)
-  provenance.py         WhyProv + QueryRewrite (index-pruned)
-  baseline.py           naive full-scan baselines
-  experiments.py        runtime / k-sweep / popularity experiments
+src/                          Python source
+  load.py                     download + load MovieLens 100K into SQLite
+  index.py                    build movie -> top-C contributors index
+  cf.py                       SVD recommender wrapper (scikit-surprise)
+  provenance.py               WhyProv + QueryRewrite (index-pruned)
+  baseline.py                 naive full-scan baselines
+  experiments.py              runtime / k-sweep / popularity experiments
 
-results/                experiment outputs (figures + CSVs)
-reports/                milestone + final reports (Markdown)
-CSDS234_Qianyi_slides.pptx   final presentation
+results/                      experiment outputs (figures + CSVs)
+CSDS234_Qianyi_slides.pptx    final presentation
 ```
-
----
-
-## Reports
-
-- [M1 — Project Statement](reports/M1.md)
-- [M2 — Dataset & Index](reports/M2.md)
-- [M3 — Algorithms & Experimental Plan](reports/M3.md)
-- [Final Report](reports/final.md)
